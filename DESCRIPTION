@@ -1,14 +1,14 @@
 Package: M3D
 Type: Package
-Title: Identifies differentially methyalted regions across testing
+Title: Identifies differentially methylated regions across testing
         groups.
-Version: 0.99.4
+Version: 0.99.5
 Date: 2014-07-17
 Author: Tom Mayo
 Maintainer: Tom Mayo <t.mayo@ed.ac.uk>
 Description: This package identifies statistically significantly
         differentially methylated regions of CpGs. It uses kernel
-        methods (the Maxmimum Mean Discrepancy) to measure differences
+        methods (the Maximum Mean Discrepancy) to measure differences
         in methylation profiles, and relates these to inter-replicate
         changes, whilst accounting for variation in coverage profiles.
 License: Artistic License 2.0
