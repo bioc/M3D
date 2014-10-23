@@ -23,6 +23,13 @@
 #' use all of them, however, should the user find one group contains unusually
 #'  high variability, then that group can be selected. 
 #' Values are either 'allReps', 'Group1' or 'Group2'. 
+#' @param method Determines which method is used to calculate p-values. 
+#' 'empirical' uses the empirical distribution directly, without modelling. 
+#'  This is the default. 'model', fits an exponential distribution to the tail 
+#'  of our null distribution. 
+#' @param closePara Sets a threshold for how close the exponential curve should
+#' fit the empirical distribution in the 'model' method. If the method produces
+#' errors, consider raising this parameter.
 #' @return Returns a list P, with 2 entries. 'FDRmean' is the Benjamini-Hochberg
 #'  adjusted p-values. The unadjusted p-values are stored in 'Pmean'.
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
@@ -42,7 +49,7 @@
 
 
 pvals <- function(rrbs, CpGs, MMD, group1, group2, 
-                  smaller=FALSE,comparison='allReps'){
+                  smaller=FALSE,comparison='allReps',method='empirical',closePara=0.005){
   # get the names of the columns to compare from MMD object
   samples1 <- rownames(colData(rrbs))[colData(rrbs)[,]==group1]
   samples2 <- rownames(colData(rrbs))[colData(rrbs)[,]==group2]
@@ -67,33 +74,89 @@ pvals <- function(rrbs, CpGs, MMD, group1, group2,
   islandList <- unique(queryHits(ovlaps))
   nIslands <- length(islandList)
   
-  Pmean <- lapply(1:nIslands, function(j) {
-    if (smaller==TRUE){
-      if (comparison=='Group1'){
-        length(which(MMD[,within1] <= mean(
-          Between[j,],na.rm=TRUE))) / length(MMD[,within1])
-      } else if (comparison=='Group2')  {
-        length(which(MMD[,within2] <= mean(
-          Between[j,],na.rm=TRUE)))/length(MMD[,within2])      
-      } else {
-        length(which(Within <= mean(
-          Between[j,],na.rm=TRUE)))/length(Within)
+  if (method=='model' | method=='model-con'){
+    # fit an exponential to the tail of the curve, using the 95th percentile
+    wndSze <- 0.01
+    cutoff <- quantile(Within,0.95,na.rm=TRUE)
+    cutoff <- floor(cutoff/wndSze)*wndSze
+    # create a sliding window and count the occurences in the bins
+    top <- ceiling(max(Within,na.rm=TRUE)/wndSze)*wndSze
+    base <- seq(cutoff, top, wndSze)
+    tot <- length(Within[!is.na(Within)])
+    cdf <- unlist(lapply(base,function(i) {
+      sum(Within<=i,na.rm=TRUE)/tot
+    }))
+    inds <- cdf!=1 # remove the log(0) terms
+    cdf <- cdf[inds]
+    base <- base[inds]
+    
+    # lambda method - search over lambdas, choose the 
+    # closest without underestimating the probabilities 
+    # (assume lambda between 1 and 150)
+
+    lambdaTests <- seq(1,150,0.1)
+    fit <- rep(NaN,length(lambdaTests))
+    pass <- rep(TRUE,length(lambdaTests))
+    countClose <- rep(TRUE,length(lambdaTests))
+    for (i in 1:length(lambdaTests)){
+      # sum squared fit
+      l<- lambdaTests[i]
+      fvect <- exp(-l*base)-1+cdf
+      if (any(fvect<0)){
+        pass[i] <- FALSE
       }
-      
-    } else {
-      
-      if (comparison=='Group1'){
-        length(which(MMD[,within1] >= mean(
-          Between[j,],na.rm=TRUE)))/length(MMD[,within1])
-      } else if (comparison=='Group2')  {
-        length(which(MMD[,within2] >= mean(
-          Between[j,],na.rm=TRUE)))/length(MMD[,within2])     
-      } else {
-        length(which(Within >= mean(
-          Between[j,],na.rm=TRUE)))/length(Within)
-      }
+      countClose[i] <- sum(abs(fvect)>closePara)
+#       fit[i] <- sum(fvect*fvect)
+      fit[i] <- abs(prod(fvect))
     }
-  })
+    close <- which(countClose-min(countClose)<=2)
+    passes <- which(pass==TRUE)
+    fit <- fit[close]
+    passes <- passes[close]
+    lambdaTests <- lambdaTests[close]
+    ind <- which(fit==min(fit,na.rm=TRUE))
+    lambda <- lambdaTests[ind]  
+    cat('lambda = ',lambda)
+    
+    # get the pvalues (under the exponential distribution with lambda)
+    # use the mean of the inter-group M3D stats
+    Pmean <- lapply(1:length(CpGs), function(i) {
+      testStat <- mean(Between[i,], na.rm=TRUE)
+      if (testStat <= 0) {
+        testStat <- 0
+      }
+      exp(-lambda* testStat)
+    })
+  } else if (method=='empirical'){
+    # use the empirical distribution of the test-statistic as null distribution
+    Pmean <- lapply(1:nIslands, function(j) {
+      if (smaller==TRUE){
+        if (comparison=='Group1'){
+          length(which(MMD[,within1] <= mean(
+            Between[j,],na.rm=TRUE))) / length(MMD[,within1])
+        } else if (comparison=='Group2')  {
+          length(which(MMD[,within2] <= mean(
+            Between[j,],na.rm=TRUE)))/length(MMD[,within2])      
+        } else {
+          length(which(Within <= mean(
+            Between[j,],na.rm=TRUE)))/length(Within)
+        }
+        
+      } else {
+        
+        if (comparison=='Group1'){
+          length(which(MMD[,within1] >= mean(
+            Between[j,],na.rm=TRUE)))/length(MMD[,within1])
+        } else if (comparison=='Group2')  {
+          length(which(MMD[,within2] >= mean(
+            Between[j,],na.rm=TRUE)))/length(MMD[,within2])     
+        } else {
+          length(which(Within >= mean(
+            Between[j,],na.rm=TRUE)))/length(Within)
+        }
+      }
+    })
+  }
   Pmean <- unlist(Pmean)
   FDRmean <- p.adjust(as.vector(Pmean),method='BH')
   P <- list(Pmean,FDRmean)

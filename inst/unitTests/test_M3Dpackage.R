@@ -120,5 +120,6 @@ test_pvals <- function(){
   group2 <- 'K562'
   M3D <- MMDlistDemo$Full-MMDlistDemo$Coverage
   checkEquals(pvals(rrbsDemo, CpGsDemo, M3D, group1, group2, 
-                    smaller=FALSE,comparison='allReps'),PDemo, tolerance=1.0e-4)  
+                    smaller=FALSE,comparison='allReps',method='empirical',
+                    closePara=0.005),PDemo, tolerance=1.0e-4)  
 }
