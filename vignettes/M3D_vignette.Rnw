@@ -28,7 +28,7 @@ RRBS experiments offer a cost-effective method for measuring the methylation lev
 
 We take a different approach, instead testing pre-defined regions of interest for changes in the distribution of the methylation profiles. Changes are compared to inter-replicate differences to establish which regions vary in a manner that cannot be explained by replicate variation alone. We utilise the maximum mean discrepancy (MMD) \cite{gretton2007kernel} to perform the test, adjusting this measure to account for changes in the coverage profile between the testing groups. 
 
-In this vignette, we run through an analysis of a toy data set using the M$^3$D method. We use the same data structures as the 'BiSeq' package, and assume that we have data stored in an rrbs structure with an accompanying GRanges object describing the regions of interest we want to test. A full explanation and exploration of the method is being prepared for a forthcoming publication.
+In this vignette, we run through an analysis of a toy data set using the M$^3$D method. We use the same data structures as the 'BiSeq' package, and assume that we have data stored in an rrbs structure with an accompanying GRanges object describing the regions of interest we want to test. A fuller explanation and exploration of the method is currently available via arXiv at the following address: http://arxiv.org/abs/1410.6677
 
 
 \section{Analysis Pipeline}
