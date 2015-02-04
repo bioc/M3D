@@ -29,6 +29,7 @@ M3D_Single <- function(testData,method='MinusCovMMD'){
   G <- locs%*%t(locs)
   L <- ncol(G)
   nor <- rep(G[seq(1,L^2,L+1)],L)
+  # locMx is the squared distance between sites
   locMx <- -2*G + matrix(nor, nrow=L, byrow=TRUE) + matrix(nor, nrow=L)
   
   # get the methylation data, to calculate the MMD 

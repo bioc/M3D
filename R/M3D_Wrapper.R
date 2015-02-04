@@ -11,6 +11,7 @@
 #'  methylation data. This is obtained using the
 #' function findOverlaps(CpGs,rrbs) for a GRanges object CpGs detailing the
 #'  testing regions.
+#'  @param para Set to true if called via M3D_Para
 #' @return This returns the two components of the M3D test-statistic for each
 #'  region over all sample pairs as a matrix. 
 #' Subtracting them gives the M3D test-statistic. This is processed with the
@@ -27,7 +28,7 @@
 #' head(M3d_list$Full-M3D_list$Coverage)}
 #' @export
 
-M3D_Wrapper <- function(rrbs, overlaps){
+M3D_Wrapper <- function(rrbs, overlaps, para=FALSE){
   nSamples = length(colnames(methReads(rrbs)))
   if (nSamples==2){
     samplesIdx <- c(1,2)
@@ -83,5 +84,10 @@ M3D_Wrapper <- function(rrbs, overlaps){
   colnames(MMDCoverage) <- ColumnNames
   ret <- list(MMD,MMDCoverage)
   names(ret) <- c('Full','Coverage')
-  return(ret)
+  if (para==FALSE){
+    return(ret)
+  } else {
+    return(cbind(MMD,MMDCoverage))
+  }
+  
 }
