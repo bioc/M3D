@@ -4,4 +4,6 @@
 
 First package release. News and details of updates will be added to this file in future releases.
 
-1.1.1 – pvals function modified to include the option for modelling the null distibution. Link to arXiv report in the vignette added.
+1.0.1 – pvals function modified to include the option for modelling the null distibution. Link to arXiv report in the vignette added.
+
+1.0.2 - parallel version (via M3D_Para function) added. Link to the Bioinformatics paper added to the vignette.
