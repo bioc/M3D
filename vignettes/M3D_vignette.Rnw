@@ -24,11 +24,11 @@ BiocStyle::latex()
 
 \section{Introduction}
 
-RRBS experiments offer a cost-effective method for measuring the methylation levels of cytosines in CpG dense regions. Statistical testing for differences in CpG methylation between sample groups typically involves beta-binomial modelling of CpG loci individually and testing across samples \cite{hebestreit2013detection, park2014methylsig}. Individual CpGs are then chained together to output a list of putative differentially methylated regions (DMRs).
+RRBS experiments offer a cost-effective method for measuring the methylation levels of cytosines in CpG dense regions. Statistical testing for differences in CpG methylation between sample groups typically involves beta-binomial modelling of CpG loci individually and testing across samples, such as with the BiSeq and MethylSig packages. Individual CpGs are then chained together to output a list of putative differentially methylated regions (DMRs).
 
 We take a different approach, instead testing pre-defined regions of interest for changes in the distribution of the methylation profiles. Changes are compared to inter-replicate differences to establish which regions vary in a manner that cannot be explained by replicate variation alone. We utilise the maximum mean discrepancy (MMD) \cite{gretton2007kernel} to perform the test, adjusting this measure to account for changes in the coverage profile between the testing groups. 
 
-In this vignette, we run through an analysis of a toy data set using the M$^3$D method. We use the same data structures as the 'BiSeq' package, and assume that we have data stored in an rrbs structure with an accompanying GRanges object describing the regions of interest we want to test. A full explanation and exploration of the method is being prepared for a forthcoming publication.
+In this vignette, we run through an analysis of a toy data set using the M$^3$D method. We use the same data structures as the 'BiSeq' package, and assume that we have data stored in an rrbs structure with an accompanying GRanges object describing the regions of interest we want to test. For a fuller explanation and exploration of the method, please see the open access journal article \cite{mayo2014m3d}.
 
 
 \section{Analysis Pipeline}
@@ -137,9 +137,12 @@ legend(x=0.5, y =3, legend=c('Replicates', 'Groups'), fill=c(col1, col2))
 @
 
 
-\subsection{Generate Empirical p-values}
+\subsection{Generating p-values}
 
-P-values are calculated by using the M$^3$D test statistic observed between all of the replicates an empirical 'null' distribution. For each island, we take the mean of the inter-group test-statistics, and calculate the likelihood of observing that value or higher among the  inter-replicate values.
+P-values are calculated by using the M$^3$D test statistic observed between all of the replicates - our 'null' distribution. For each island, we take the mean of the inter-group test-statistics, and calculate the likelihood of observing that value or higher among the  inter-replicate values.
+
+We provide two methods for this calculation. 'empirical' gives the empirical probabilities, and is the default method. In the event that we see M$^3$D test statistics between groups above the range of the inter-replicate values, we get p-values of 0. This is not a concern for large samples, but in case of small samples, we recommend using the 'model' option, whereby an exponential is fitted to the tails of the distribution and p-values are calculated from the exponential.
+
 
 The function 'pvals' computes this, taking in the raw data, the regions, the test statistic and the names of the two groups being compared as stored in the rrbs object.
 
@@ -157,7 +160,7 @@ Or calculated via:
 group1 <- unique(colData(rrbsDemo)$group)[1]
 group2 <-unique(colData(rrbsDemo)$group)[2]
 PDemo <- pvals(rrbsDemo, CpGsDemo, M3Dstat,
-    group1, group2, smaller=FALSE, comparison='allReps')
+    group1, group2, smaller=FALSE, comparison='allReps', method='empirical', closePara=0.005)
 head(PDemo$FDRmean)
 @
 

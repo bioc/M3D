@@ -4,8 +4,10 @@
 \paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
 
-\f0\fs24 \cf0 **************************************************\
-*	       1.0 SERIES NEWS			 *\
-**************************************************\
-\
-First package release. News and details of updates will be added to this file in future releases.}
+First package release. News and details of updates will be added to this file in future releases.
+
+1.0.1 – pvals function modified to include the option for modelling the null distibution. Link to arXiv report in the vignette added.
+
+1.0.2 - parallel version (via M3D_Para function) added. Link to the Bioinformatics paper added to the vignette.
+
+1.0.3 - fix warnings in bioconductor daily build

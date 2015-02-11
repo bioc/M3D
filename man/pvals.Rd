@@ -4,7 +4,7 @@
 \title{Computes p-values}
 \usage{
 pvals(rrbs, CpGs, MMD, group1, group2, smaller = FALSE,
-  comparison = "allReps")
+  comparison = "allReps", method = "empirical", closePara = 0.005)
 }
 \arguments{
 \item{rrbs}{An rrbs object containing methylation and coverage data as
@@ -32,6 +32,15 @@ values. For our purposes, it should be set to FALSE.}
 use all of them, however, should the user find one group contains unusually
  high variability, then that group can be selected.
 Values are either 'allReps', 'Group1' or 'Group2'.}
+
+\item{method}{Determines which method is used to calculate p-values.
+'empirical' uses the empirical distribution directly, without modelling.
+ This is the default. 'model', fits an exponential distribution to the tail
+ of our null distribution.}
+
+\item{closePara}{Sets a threshold for how close the exponential curve should
+fit the empirical distribution in the 'model' method. If the method produces
+errors, consider raising this parameter.}
 }
 \value{
 Returns a list P, with 2 entries. 'FDRmean' is the Benjamini-Hochberg
