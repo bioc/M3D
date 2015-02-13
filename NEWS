@@ -11,3 +11,5 @@ First package release. News and details of updates will be added to this file in
 1.0.2 - parallel version (via M3D_Para function) added. Link to the Bioinformatics paper added to the vignette.
 
 1.0.3 - fix warnings in bioconductor daily build
+
+1.1.4 - update release branch to match devel branch 

@@ -1,7 +1,7 @@
 Package: M3D
 Type: Package
 Title: Identifies differentially methylated regions across testing groups.
-Version: 1.1.3
+Version: 1.1.4
 Date: 2015-02-03
 Author: Tom Mayo
 Maintainer: Tom Mayo <t.mayo@ed.ac.uk>
