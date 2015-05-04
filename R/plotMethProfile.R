@@ -22,15 +22,15 @@
 #' plotMethProfile(rrbsDemo, CpGsDemo, 'H1-hESC', 'K562', 9)
 
 plotMethProfile<- function(rrbs,CpGs,group1,group2,CpGindex){
-  Ov <- findOverlaps(CpGs[CpGindex],rowData(rrbs))
-  CpGisland <- rowData(rrbs)[subjectHits(Ov)]
+  Ov <- findOverlaps(CpGs[CpGindex],rowRanges(rrbs))
+  CpGisland <- rowRanges(rrbs)[subjectHits(Ov)]
   if (length(CpGisland)==0){   # in case we pass an empty island
     warning('This island is empty, returning without plotting')
     return()
   }
   # STEP 1. Get the Cystosine sites
   CytoSites <- start(ranges(CpGisland))
-  Ovlaps <- findOverlaps(CpGisland,rowData(rrbs))
+  Ovlaps <- findOverlaps(CpGisland,rowRanges(rrbs))
   sampleNames1 <- rownames(colData(rrbs))[colData(rrbs)$group==group1]   
   # STEP 2. Get the methylation data. 
   #Average over the groups. Find the proportions

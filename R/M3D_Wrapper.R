@@ -41,7 +41,7 @@ M3D_Wrapper <- function(rrbs, overlaps, para=FALSE){
   }
   
   islands <- unique(queryHits(overlaps))
-  CSites <- rowData(rrbs)
+  CSites <- rowRanges(rrbs)
   MMD <- matrix(NA,nrow=length(islands),ncol=numPairs)
   MMDCoverage <- matrix(NA,nrow=length(islands),ncol=numPairs)
   ColumnNames <- vector()

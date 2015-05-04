@@ -67,7 +67,7 @@ The function requires a list of overlap locations, which we create as follows:
 <<>>=
 data(CpGsDemo)
 data(rrbsDemo)
-overlaps <- findOverlaps(CpGsDemo,rowData(rrbsDemo))
+overlaps <- findOverlaps(CpGsDemo,rowRanges(rrbsDemo))
 @
 
 The components of the M$^3$D statistic are then generated with the code:
@@ -215,7 +215,7 @@ In this example, we cut out regions with a total coverage of less than 100 in ea
 
 <<eval=FALSE>>=
 inds <- vector()
-overlaps <- findOverlaps(CpGs,rowData(rrbs.CpGs))
+overlaps <- findOverlaps(CpGs,rowRanges(rrbs.CpGs))
 for (i in 1:length(CpGs)){
   covs <- colSums(totalReads(rrbs.CpGs)[subjectHits(
   	overlaps[queryHits(overlaps)==i]),])
@@ -232,9 +232,9 @@ Next, to create the toy dataset here, we took only the first 1000 regions. It is
 # reduce the rrbs to only the cytosine sites within regions
 rrbs <- rrbs.CpGs
 CpGs <- CpGs[1:1000] # first 1000 regions
-overlaps <- findOverlaps(CpGs,rowData(rrbs))
+overlaps <- findOverlaps(CpGs,rowRanges(rrbs))
 rrbs <- rrbs[subjectHits(overlaps)]
-overlaps <- findOverlaps(CpGs,rowData(rrbs))
+overlaps <- findOverlaps(CpGs,rowRanges(rrbs))
 @
 
 Following these steps produces the toy data in this package.

@@ -70,7 +70,7 @@ pvals <- function(rrbs, CpGs, MMD, group1, group2,
   
   # find the total counts over each island, per sample
   nCpGs <- length(CpGs)
-  ovlaps <- findOverlaps(CpGs,rowData(rrbs))
+  ovlaps <- findOverlaps(CpGs,rowRanges(rrbs))
   islandList <- unique(queryHits(ovlaps))
   nIslands <- length(islandList)
   

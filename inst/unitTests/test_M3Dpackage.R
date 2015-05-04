@@ -61,7 +61,7 @@ test_M3D_Single <- function(){
   samplesIdx <- cbind(a,b)
   
   methIndices <- subjectHits(overlaps[queryHits(overlaps)==1])
-  testData <- rowData(rrbs)[methIndices]
+  testData <- rowRanges(rrbs)[methIndices]
   
   sample1 <- "H1-hESC1"
   sample2 <- "H1-hESC2"
@@ -82,7 +82,7 @@ test_M3D_Single <- function(){
               list(0.2358175,0.2618952), tolerance=1.0e-3)
   
   methIndices <- subjectHits(overlaps[queryHits(overlaps)==15])
-  testData <- rowData(rrbs)[methIndices]
+  testData <- rowRanges(rrbs)[methIndices]
   
   sample1 <- "H1-hESC1"
   sample2 <- "K562-2"
@@ -94,7 +94,7 @@ test_M3D_Single <- function(){
               list(0.06645972,0.06732423), tolerance=1.0e-3)
   
   methIndices <- subjectHits(overlaps[queryHits(overlaps)==121])
-  testData <- rowData(rrbs)[methIndices]
+  testData <- rowRanges(rrbs)[methIndices]
   sample1 <- "K562-1"
   sample2 <- "K562-2"
   methData <- methReads(rrbs)[methIndices,c(sample1,sample2)]
