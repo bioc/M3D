@@ -94,7 +94,7 @@ readENCODEdata <- function(files, colData,eData=NaN) {
   rrbs = BSraw(
     exptData=eData,
     colData = colData,
-    rowData = fData,
+    rowRanges = fData,
     totalReads = tReads,
     methReads = mReads)
   
