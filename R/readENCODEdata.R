@@ -24,7 +24,7 @@
 #' colData <- DataFrame(group,row.names= samples)
 #' rrbs <- readENCODEdata(files,colData)}
 
-readENCODEdata <- function(files, colData) {
+readENCODEdata <- function(files, colData,eData=NaN) {
   if (nrow(colData) != length(files)) {
     stop("Row number of colData must equal length of files.")
   }
@@ -87,8 +87,12 @@ readENCODEdata <- function(files, colData) {
   colnames(mReads) <- rownames(colData)
   rownames(tReads) <- names(fData)
   rownames(mReads) <- names(fData)
+  if(is.na(eData)){
+    eData <- SimpleList(exp='Demo')
+  }
   
   rrbs = BSraw(
+    exptData=eData,
     colData = colData,
     rowRanges = fData,
     totalReads = tReads,
