@@ -7,6 +7,8 @@
 #'  ENCODE database.
 #' @param colData Samples' names plus additional sample information as
 #'  character, data.frame or DataFrame.
+#' @param eData Experiment data to describe the work. This is used to create 
+#' the BSraw object as in the BiSeq package.
 #' @return Returns a BSraw object storing methylation and coverage data -
 #'  the underlying structure for this package.
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
