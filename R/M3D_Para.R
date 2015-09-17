@@ -88,20 +88,20 @@ M3D_Para <- function(rrbs, CpGs, overlaps,num.cores=NaN){
     #now matrix
     fullmx <- matrix(NaN,ncol=length(ColumnNames)*2, nrow=numIslands)
     if (is.matrix(MMDret)){
-      for (i in 1:num.cores){
-        temp <- matrix(MMDret[,i], ncol=length(ColumnNames)*2, nrow=length(indList[[i]]))
-        fullmx[indList[[i]],] <- temp
-      }
+        for (i in 1:num.cores){
+            temp <- matrix(MMDret[,i], ncol=length(ColumnNames)*2, nrow=length(indList[[i]]))
+            fullmx[indList[[i]],] <- temp
+        }
     } else if (is.list(MMDret)) {
-      startRow <- 1
-      for (i in 1:num.cores){
-        numCols <- length(MMDret[[i]][,1])
-        stopRow <- startRow+numCols-1
-        fullmx[startRow:stopRow,] <- MMDret[[i]]
-        startRow <- stopRow+1
-      }
+        startRow <- 1
+        for (i in 1:num.cores){
+            numCols <- length(MMDret[[i]][,1])
+            stopRow <- startRow+numCols-1
+            fullmx[startRow:stopRow,] <- MMDret[[i]]
+            startRow <- stopRow+1
+        }
     } else {
-      stop('The parallel call returns neither a list nor a matrix')
+        stop('The parallel call returns neither a list nor a matrix')
     }
     end <- length(fullmx[1,])/2
     MMD <- fullmx[,1:end]
