@@ -1,7 +1,7 @@
 Package: M3D
 Type: Package
-Title: Identifies differentially methylated regions across testing groups.
-Version: 1.3.6
+Title: Identifies differentially methylated regions across testing groups
+Version: 1.3.8
 Date: 2015-09-17
 Author: Tom Mayo
 Maintainer: Tom Mayo <t.mayo@ed.ac.uk>
@@ -14,7 +14,7 @@ License: Artistic License 2.0
 Imports:
     GenomicRanges,
     IRanges,
-    BiSeq (>= 1.9.2),
+    BiSeq,
     parallel
 Depends:
     R (>= 3.0.0)
