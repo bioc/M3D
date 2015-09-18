@@ -52,7 +52,11 @@ M3D_Para <- function(rrbs, CpGs, overlaps,num.cores=NaN){
         
         ovs <- overlaps[queryHits(overlaps) %in% inds]
         rrbsList[[i]]<-rrbs[subjectHits(ovs)]
-        ovs <- findOverlaps(CpGs[inds],rrbsList[[i]])
+        len <- length(subjectHits(ovs))
+        q.map <- as.integer(queryHits(ovs)-(queryHits(ovs)[1]-1))
+        s.map <- as.integer(1:len)
+        ovs <- new('Hits',queryHits=q.map,subjectHits=s.map,
+                   queryLength=len,subjectLength=len)
         ovList[[i]] <- ovs
         indList[[i]] <- inds
     }
