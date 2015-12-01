@@ -34,9 +34,12 @@
 #'  adjusted p-values. The unadjusted p-values are stored in 'Pmean'.
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
 #' @export
-#' @import BiSeq
-#' @import GenomicRanges
+#' @import BiocGenerics
+#' @import S4Vectors
 #' @import IRanges
+#' @import GenomicRanges
+#' @import SummarizedExperiment
+#' @import BiSeq
 #' @examples
 #' \donttest{data(rrbsDemo)
 #' data(CpGsDemo)
