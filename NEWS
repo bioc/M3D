@@ -17,3 +17,5 @@ First package release. News and details of updates will be added to this file in
 1.3.6 Optimised code to speed up the process. This now runs approximately 5x faster, with parallel implementation significantly better.
 
 1.3.9 Minor speed ups.
+
+1.7.4 Major speedups to main functions. ‘lite’ functions introduced, which are faster and save memory. See the vignette for details.

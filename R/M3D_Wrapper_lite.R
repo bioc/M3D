@@ -1,9 +1,9 @@
 #' Computes the components of the M3D test-statistic over all regions for all
 #'  sample-pairs.
 #'
-#' Returns the two components of the M3D test-statistic - the MMD
-#'  (Gretton et al. 2006) for the full data and the coverge
-#' only data, respectively - for all regions and all samples pairs, as a matrix.
+#' Returns the M3D test-statistic, without the compenents, for all regions
+#' with the cross group sample pairs averaged to save memory (in column one),
+#'  as a matrix.
 #'
 #' @param rrbs An rrbs object containing methylation and coverage data as
 #'  created using the BiSeq pacakge
@@ -11,7 +11,11 @@
 #'  methylation data. This is obtained using the
 #' function findOverlaps(CpGs,rrbs) for a GRanges object CpGs detailing the
 #'  testing regions.
-#' @param para Set to true if called via M3D_Para
+#' @param group1 The name of the first group for the comparison. This is stored
+#'  in colData(rrbs). Default finds first unique group in colData(rrbs).
+#' @param group2 The name of the second group for the comparison. This is stored
+#'  in colData(rrbs). Default finds second unique group in colData(rrbs).
+#' @param verbose Logical vector. If true, the function prints a progress bar.
 #' @return This returns the two components of the M3D test-statistic for each
 #'  region over all sample pairs as a matrix.
 #' Subtracting them gives the M3D test-statistic. This is processed with the
@@ -23,14 +27,20 @@
 #' @examples
 #' data(rrbsDemo)
 #' data(CpGsDemo)
-#'CpGsDemo <- CpGsDemo[1:5]
+#' CpGsDemo <- CpGsDemo[1:5]
 #' overlaps <- GenomicRanges::findOverlaps(CpGsDemo,rrbsDemo)
-#' M3D_list <- M3D_Wrapper(rrbsDemo,overlaps)
-#' head(M3D_list$Full-M3D_list$Coverage)
+#' M3D_list <- M3D_Wrapper_lite(rrbsDemo,overlaps)
+#' head(M3D_list)
 #' @export
 
-M3D_Wrapper <- function(rrbs, overlaps, para=FALSE){
-    nSamples = length(colnames(methReads(rrbs)))
+M3D_Wrapper_lite <- function(rrbs, overlaps, group1=NaN, group2=NaN, verbose = TRUE){
+    if (is.na(group1)){
+        group1 <- as.character(unique(colData(rrbs)$group)[1])
+    }
+    if (is.na(group2)){
+        group2 <- as.character(unique(colData(rrbs)$group)[2])
+    }
+    nSamples = sum(colData(rrbs)$group==group1,colData(rrbs)$group==group2)
     if (nSamples==2){
         samplesIdx <- c(1,2)
         numPairs <- 1
@@ -41,7 +51,6 @@ M3D_Wrapper <- function(rrbs, overlaps, para=FALSE){
         numPairs <- length(samplesIdx[,1])
     }
 
-
     # store objects here to avoid slow lookups, potential memory hazard
     m_reads <- methReads(rrbs)
     t_reads <- totalReads(rrbs)
@@ -49,26 +58,44 @@ M3D_Wrapper <- function(rrbs, overlaps, para=FALSE){
     q_hits <- queryHits(overlaps)
     sub_hits <- subjectHits((overlaps))
 
-    islands <- unique(queryHits(overlaps))
-    CSites <- rowRanges(rrbs)
-    MMD <- matrix(NA,nrow=length(islands),ncol=numPairs)
-    MMDCoverage <- matrix(NA,nrow=length(islands),ncol=numPairs)
-    col_sample_names <- colnames(m_reads)
-
     ### make colnames - vectorize
+    all_sample_names <- rownames(colData(rrbs))[colData(rrbs)$group==group1]
+    all_sample_names <- c(all_sample_names,
+                          rownames(colData(rrbs))[colData(rrbs)$group==group2])
     ColumnNames <- unlist(lapply(1:numPairs, function(pairInd){
         if (numPairs==1){
             pair <- c(1,2)
         } else {
             pair <- samplesIdx[pairInd,]
         }
-        sample1 <- colnames(m_reads)[pair[1]]
-        sample2 <- colnames(m_reads)[pair[2]]
+        sample1 <- all_sample_names[pair[1]]
+        sample2 <- all_sample_names[pair[2]]
         return(paste(sample1, ' vs ', sample2))
     }))
 
+    l <- length(ColumnNames)
+    temp <- matrix(rep(0,2*l),nrow=2,ncol=l) # to work with findcomps (hack)
+    colnames(temp) <- ColumnNames
+    ### code from pvals
+    samples1 <- rownames(colData(rrbs))[colData(rrbs)[,]==group1]
+    samples2 <- rownames(colData(rrbs))[colData(rrbs)[,]==group2]
+    within1 <- determineGroupComps(samples1,type='within')
+    within2 <- determineGroupComps(samples2,type='within')
+    within <- c(within1,within2)
+    between <- determineGroupComps(samples1,samples2,type='between')
+
+    idsWithin <- c(findComps(temp,within1),findComps(temp,within2))
+    idsBetween <- findComps(temp,between)
+    ##### end code from pvals
+
+    islands <- unique(queryHits(overlaps))
+    M3D_stat <- matrix(NA,nrow=length(islands),ncol=1+length(idsWithin))
+    col_sample_names <- c(samples1, samples2)
+
     # loop over islands, then over samples
-    pb <- txtProgressBar(min=1,max=length(islands),style=3)
+    if(verbose){
+        pb <- txtProgressBar(min=1,max=length(islands),style=3)
+    }
     for (i in 1:length(islands)) {
         island <- islands[i]
         methIndices <- sub_hits[q_hits==island]
@@ -88,6 +115,7 @@ M3D_Wrapper <- function(rrbs, overlaps, para=FALSE){
         locMx <- -2*G + matrix(nor, nrow=L, byrow=TRUE) + matrix(nor, nrow=L)
         locInds <- which(locMx!=0)
 
+        temp <- rep(NA,numPairs)
         for (pairInd in 1:numPairs){
             if (numPairs==1){
                 pair <- c(1,2)
@@ -104,22 +132,20 @@ M3D_Wrapper <- function(rrbs, overlaps, para=FALSE){
             testData <- matrix(0, nrow = dim(methData)[1], ncol = 4)
             testData[,1:2] <- methData
             testData[,3:4] <- unmethData
-
             # compute the MMDs
-            res <- M3D_Single(testData,locMx,locInds,method='MinusCovMMD')
-            MMD[i,pairInd] <- res[[1]]
-            MMDCoverage[i,pairInd] <- res[[2]]
+            res <- M3D_Single(testData,locMx, locInds, method='MinusCovMMD')
+            temp[pairInd] <- res[[1]] - res[[2]] # MMD - MMDCoverage
+            # store as vector for the island
         }
-        setTxtProgressBar(pb,i)
+        M3D_stat[i,1] <- mean(temp[idsBetween],na.rm=TRUE)
+        M3D_stat[i,2:(1+length(idsWithin))] <- temp[idsWithin]
+        if(verbose){
+            setTxtProgressBar(pb,i)
+        }
     }
-    close(pb)
-    colnames(MMD) <- ColumnNames
-    colnames(MMDCoverage) <- ColumnNames
-    ret <- list(MMD,MMDCoverage)
-    names(ret) <- c('Full','Coverage')
-    if (para==FALSE){
-        return(ret)
-    } else {
-        return(cbind(MMD,MMDCoverage))
+    if(verbose){
+        close(pb)
     }
+    colnames(M3D_stat) <- c('MeanBetween',ColumnNames[idsWithin])
+    return(M3D_stat)
 }

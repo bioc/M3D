@@ -12,7 +12,7 @@ BiocStyle::latex()
 
 \title{M$^3$D: Statistical Testing for RRBS Data Sets}
 \author{Tom Mayo}
-\date{Modified: 12 Aug, 2014. Compiled: \today}
+\date{Modified: 17 June, 2016. Compiled: \today}
 
 \begin{document}
 
@@ -24,9 +24,11 @@ BiocStyle::latex()
 
 \section{Introduction}
 
+**** Please note, that as of 17th June 2016, we have introduced new 'lite' functions, detailed in section \ref{lite_section}. These are faster and more memory efficient than their predecessors and we recommend their use where possible ****
+
 RRBS experiments offer a cost-effective method for measuring the methylation levels of cytosines in CpG dense regions. Statistical testing for differences in CpG methylation between sample groups typically involves beta-binomial modelling of CpG loci individually and testing across samples, such as with the BiSeq and MethylSig packages. Individual CpGs are then chained together to output a list of putative differentially methylated regions (DMRs).
 
-We take a different approach, instead testing pre-defined regions of interest for changes in the distribution of the methylation profiles. Changes are compared to inter-replicate differences to establish which regions vary in a manner that cannot be explained by replicate variation alone. We utilise the maximum mean discrepancy (MMD) \cite{gretton2007kernel} to perform the test, adjusting this measure to account for changes in the coverage profile between the testing groups. 
+We take a different approach, instead testing pre-defined regions of interest for changes in the distribution of the methylation profiles. Changes are compared to inter-replicate differences to establish which regions vary in a manner that cannot be explained by replicate variation alone. We utilise the maximum mean discrepancy (MMD) \cite{gretton2007kernel} to perform the test, adjusting this measure to account for changes in the coverage profile between the testing groups. For a similar application of the MMD to ChIP-Seq data, please see the MMDiff Bioconductor package, and associated paper \cite{schweikert2013mmdiff}.
 
 In this vignette, we run through an analysis of a toy data set using the M$^3$D method. We use the same data structures as the 'BiSeq' package, and assume that we have data stored in an rrbs structure with an accompanying GRanges object describing the regions of interest we want to test. For a fuller explanation and exploration of the method, please see the open access journal article \cite{mayo2014m3d}.
 
@@ -50,17 +52,17 @@ library(M3D)
 data(rrbsDemo)
 rrbsDemo
 @
- 
+
  The regions to be tested are stored in a Granges object, with each entry representing the start and end of the region. This can be loaded as follows:
- 
+
 <<>>=
 data(CpGsDemo)
 CpGsDemo
 @
- 
+
 \subsection{Computing the MMD, and coverage-MMD}
 
-The M$^3$D test statistic is calculated by finding the maximum mean discrepancy, over each island, of the full methylation data and the coverage data. Both of these are achieved using the M3D\textunderscore Wrapper function. This outputs a list, with the first entry being a matrix of the pairwise full, methylation aware MMD of each possible sample pair, and the second being the coverage only equivalent. 
+The M$^3$D test statistic is calculated by finding the maximum mean discrepancy, over each island, of the full methylation data and the coverage data. Both of these are achieved using the M3D\textunderscore Wrapper function. This outputs a list, with the first entry being a matrix of the pairwise full, methylation aware MMD of each possible sample pair, and the second being the coverage only equivalent.
 
 The function requires a list of overlap locations, which we create as follows:
 
@@ -90,7 +92,7 @@ head(MMDlistDemo$Full)
 head(MMDlistDemo$Coverage)
 @
 
-The M$^3$D test statistic uses the difference between these values. 
+The M$^3$D test statistic uses the difference between these values.
 
 <<>>=
 M3Dstat <- MMDlistDemo$Full-MMDlistDemo$Coverage
@@ -104,7 +106,7 @@ plot(as.vector(MMDlistDemo$Full[,repCols]),
     as.vector(MMDlistDemo$Coverage[,repCols]),
     xlab='Full MMD',ylab='Coverage MMD')
     title('Test Statistics: Replicate Comparison')
-abline(a=0,b=1,col='red',lwd=2)    
+abline(a=0,b=1,col='red',lwd=2)
 @
 
 And analogously for the inter-group values. Note that with the replicates, the values are close to the red line, representing equality. With the inter-group metrics, we see that, with some of the regions, the full MMD is greater than the coverage only version. This forms the basis of the M$^3$D test statistic, which is used in the following section.
@@ -115,7 +117,7 @@ plot(as.vector(MMDlistDemo$Full[,groupCols]),
     as.vector(MMDlistDemo$Coverage[,groupCols]),
     xlab='Full MMD',ylab='Coverage MMD')
 title('Test Statistics: Inter-Group Comparison')
-abline(a=0,b=1,col='red',lwd=2)   
+abline(a=0,b=1,col='red',lwd=2)
 @
 
 This can be summarised in a histogram of the M$^3$D test statistics.
@@ -154,7 +156,7 @@ The structure can be explored with:
 data(PDemo)
 @
 
-Or calculated via: 
+Or calculated via:
 
 <<>>=
 group1 <- unique(colData(rrbsDemo)$group)[1]
@@ -182,11 +184,49 @@ for (i in 1:4){
 }
 @
 
+\section{Using the 'lite' functions} \label{lite_section}
+
+When dealing with larger data sets such as those consisting of many replicates, or if we simply want faster processing times, we may want to reduce the amount of data stored by the M3D method. The lite functions provide such a feature.
+
+M3D\textunderscore Wrapper\textunderscore lite and M3D\textunderscore Para\textunderscore lite operate exactly as M3D\textunderscore Wrapper and M3D\textunderscore Para, so that instead of entering the following:
+
+<<eval=FALSE>>=
+MMDlistDemo <- M3D_Wrapper(rrbsDemo, overlaps)
+@
+
+We can enter
+
+<<eval=FALSE>>=
+MMDlistDemo <- M3D_Wrapper_lite(rrbsDemo, overlaps)
+@
+
+The difference is in how the results are stored and returned. In the lite functions, instead of retruning the full MMD and the coverage only MMD, for the user to subtract, the function automatically subtracts the coverage only MMD from the full MMD and returns the difference.
+
+Another memory and time saving step is that, since the mean of the inter group M3D statistics is used to calculate the p-values, the lite functions calculate this mean and store it in the first column. Thus in an m by n replicate comparison, we save $m*n - 1$ columns of data.
+
+Clearly the new structure will not work with the original pvals function. A pvals\textunderscore lite function has been created to cope with the new output. The workflow has therefore changed from:
+
+<<eval=FALSE>>=
+MMDlistDemo <- M3D_Wrapper(rrbsDemo, overlaps)
+M3Dstat <- MMDlistDemo$Full-MMDlistDemo$Coverage
+PDemo <- pvals(rrbsDemo, CpGsDemo, M3Dstat,
+    group1, group2, smaller=FALSE, comparison='allReps', method='empirical', closePara=0.005)
+@
+Where group1 and group2 have already been defined, to:
+
+<<eval=FALSE>>=
+MMDlistDemo <- M3D_Wrapper_lite(rrbsDemo, overlaps)
+PDemo <- pvals_lite(rrbsDemo, CpGsDemo, M3Dstat,
+    group1, group2, smaller=FALSE, comparison='allReps', method='empirical', closePara=0.005)
+@
+
+The two differences are that we no longer subtract the two composite MMD values, and we use '\textunderscore lite' at the end of each function.
+
 \section{Using ENCODE data}
 
 This section will demonstrate how to load ENCODE RRBS data for use with the package. Data is available for download from: \url{http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibMethylRrbs/}
 
-For this package we have used the H1-ESC and K562 cell lines, each of which have two replicates. We therefore download the files named:  'wgEncodeHaibMethylRrbsH1hescHaibSitesRep1.bed.gz', 'wgEncodeHaibMethylRrbsH1hescHaibSitesRep2.bed.gz', 'wgEncodeHaibMethylRrbsK562HaibSitesRep1.bed.gz' and 'wgEncodeHaibMethylRrbsK562HaibSitesRep2.bed.gz'. 
+For this package we have used the H1-ESC and K562 cell lines, each of which have two replicates. We therefore download the files named:  'wgEncodeHaibMethylRrbsH1hescHaibSitesRep1.bed.gz', 'wgEncodeHaibMethylRrbsH1hescHaibSitesRep2.bed.gz', 'wgEncodeHaibMethylRrbsK562HaibSitesRep1.bed.gz' and 'wgEncodeHaibMethylRrbsK562HaibSitesRep2.bed.gz'.
 
 To load in the data, change directory to the location of the 4 files named above and use the readENCODEdata function provided in the package. This function is a adaption of BiSeq's readBismark file to handle this format. Unfortunately, RRBS data files frequently have differing layouts, but this function is readily adaptable to new layouts.
 
@@ -198,7 +238,7 @@ colData <- DataFrame(group,row.names= samples)
 files <- c('wgEncodeHaibMethylRrbsH1hescHaibSitesRep1.bed.gz',
            'wgEncodeHaibMethylRrbsH1hescHaibSitesRep2.bed.gz',
            'wgEncodeHaibMethylRrbsK562HaibSitesRep1.bed.gz',
-           'wgEncodeHaibMethylRrbsK562HaibSitesRep2.bed.gz')  
+           'wgEncodeHaibMethylRrbsK562HaibSitesRep2.bed.gz')
 rrbs <- readENCODEdata(files,colData)
 @
 
@@ -239,9 +279,9 @@ overlaps <- findOverlaps(CpGs,rowRanges(rrbs))
 
 Following these steps produces the toy data in this package.
 
-\section{Acknowledgements} 
+\section{Acknowledgements}
  This package was developed at the University of Edinburgh in the School of Informatics, with support from Guido Sanguinetti and Gabriele Schweikert.
- 
+
  The work was supported by grants EP/F500385/1 and BB/F529254/1
 from the UK Engineering and Physical Sciences Research Council,
 UK Biotechnology and Biological Sciences Research Council, and

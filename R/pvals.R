@@ -1,9 +1,9 @@
 #' Computes p-values
-#' 
+#'
 #' Returns p-values for each region reflecting the probability of observing the
-#'  mean test-statistic 
+#'  mean test-statistic
 #' of the between group comparisons among the inter-replicate comparisons.
-#' 
+#'
 #' @param rrbs An rrbs object containing methylation and coverage data as
 #'  created using the BiSeq pacakge
 #' @param CpGs A GRanges object with each row being a testing region
@@ -16,17 +16,17 @@
 #' @param group2 The name of the second group for the comparison. This is stored
 #'  in colData(rrbs)
 #' @param smaller Determines whether the p-value is computed whether the
-#'  test-statistic is greater or lesser than inter-replicate 
+#'  test-statistic is greater or lesser than inter-replicate
 #' values. For our purposes, it should be set to FALSE.
 #' @param comparison Details which groups we are using to define our empirical
-#'  testing distribution. The default is to 
+#'  testing distribution. The default is to
 #' use all of them, however, should the user find one group contains unusually
-#'  high variability, then that group can be selected. 
-#' Values are either 'allReps', 'Group1' or 'Group2'. 
-#' @param method Determines which method is used to calculate p-values. 
-#' 'empirical' uses the empirical distribution directly, without modelling. 
-#'  This is the default. 'model', fits an exponential distribution to the tail 
-#'  of our null distribution. 
+#'  high variability, then that group can be selected.
+#' Values are either 'allReps', 'Group1' or 'Group2'.
+#' @param method Determines which method is used to calculate p-values.
+#' 'empirical' uses the empirical distribution directly, without modelling.
+#'  This is the default. 'model', fits an exponential distribution to the tail
+#'  of our null distribution.
 #' @param closePara Sets a threshold for how close the exponential curve should
 #' fit the empirical distribution in the 'model' method. If the method produces
 #' errors, consider raising this parameter.
@@ -34,24 +34,21 @@
 #'  adjusted p-values. The unadjusted p-values are stored in 'Pmean'.
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
 #' @export
-#' @import BiocGenerics
-#' @import S4Vectors
-#' @import IRanges
-#' @import GenomicRanges
-#' @import SummarizedExperiment
 #' @import BiSeq
+#' @import GenomicRanges
+#' @import IRanges
 #' @examples
-#' \donttest{data(rrbsDemo)
+#' data(rrbsDemo)
 #' data(CpGsDemo)
 #' data(MMDlistDemo)
 #' M3Dstat <- MMDlistDemo$Full-MMDlistDemo$Coverage
-#' group1 <- unique(colData(rrbsDemo)$group)[1]
-#' group2 <-unique(colData(rrbsDemo)$group)[2]
+#' group1 <- unique(GenomicRanges::colData(rrbsDemo)$group)[1]
+#' group2 <-unique(GenomicRanges::colData(rrbsDemo)$group)[2]
 #' PDemo <- pvals(rrbsDemo, CpGsDemo, M3Dstat,
-#'             group1, group2, smaller=FALSE,comparison='allReps')}
+#'            group1, group2, smaller=FALSE,comparison='allReps')
+#' head(PDemo)
 
-
-pvals <- function(rrbs, CpGs, MMD, group1, group2, 
+pvals <- function(rrbs, CpGs, MMD, group1, group2,
                   smaller=FALSE,comparison='allReps',method='empirical',closePara=0.005){
   # get the names of the columns to compare from MMD object
   samples1 <- rownames(colData(rrbs))[colData(rrbs)[,]==group1]
@@ -60,23 +57,23 @@ pvals <- function(rrbs, CpGs, MMD, group1, group2,
   within2 <- determineGroupComps(samples2,type='within')
   within <- c(within1,within2)
   between <- determineGroupComps(samples1,samples2,type='between')
-  
+
   ids1 <- findComps(MMD,within1)
   ids2 <- findComps(MMD,within2)
   ids3 <- findComps(MMD,between)
-  
+
   # get the MMD in order of between groups, then within groups
   Within <- cbind(MMD[,within1],MMD[,within2])
   colnames(Within) <- c(within1,within2)
   Between <- MMD[,between]
   AvsB <- cbind(Between,Within)
-  
+
   # find the total counts over each island, per sample
   nCpGs <- length(CpGs)
   ovlaps <- findOverlaps(CpGs,rowRanges(rrbs))
   islandList <- unique(queryHits(ovlaps))
   nIslands <- length(islandList)
-  
+
   if (method=='model' | method=='model-con'){
     # fit an exponential to the tail of the curve, using the 95th percentile
     wndSze <- 0.01
@@ -92,9 +89,9 @@ pvals <- function(rrbs, CpGs, MMD, group1, group2,
     inds <- cdf!=1 # remove the log(0) terms
     cdf <- cdf[inds]
     base <- base[inds]
-    
-    # lambda method - search over lambdas, choose the 
-    # closest without underestimating the probabilities 
+
+    # lambda method - search over lambdas, choose the
+    # closest without underestimating the probabilities
     # (assume lambda between 1 and 150)
 
     lambdaTests <- seq(1,150,0.1)
@@ -118,9 +115,9 @@ pvals <- function(rrbs, CpGs, MMD, group1, group2,
     passes <- passes[close]
     lambdaTests <- lambdaTests[close]
     ind <- which(fit==min(fit,na.rm=TRUE))
-    lambda <- lambdaTests[ind]  
+    lambda <- lambdaTests[ind]
     cat('lambda = ',lambda)
-    
+
     # get the pvalues (under the exponential distribution with lambda)
     # use the mean of the inter-group M3D stats
     Pmean <- lapply(1:length(CpGs), function(i) {
@@ -139,20 +136,20 @@ pvals <- function(rrbs, CpGs, MMD, group1, group2,
             Between[j,],na.rm=TRUE))) / length(MMD[,within1])
         } else if (comparison=='Group2')  {
           length(which(MMD[,within2] <= mean(
-            Between[j,],na.rm=TRUE)))/length(MMD[,within2])      
+            Between[j,],na.rm=TRUE)))/length(MMD[,within2])
         } else {
           length(which(Within <= mean(
             Between[j,],na.rm=TRUE)))/length(Within)
         }
-        
+
       } else {
-        
+
         if (comparison=='Group1'){
           length(which(MMD[,within1] >= mean(
             Between[j,],na.rm=TRUE)))/length(MMD[,within1])
         } else if (comparison=='Group2')  {
           length(which(MMD[,within2] >= mean(
-            Between[j,],na.rm=TRUE)))/length(MMD[,within2])     
+            Between[j,],na.rm=TRUE)))/length(MMD[,within2])
         } else {
           length(which(Within >= mean(
             Between[j,],na.rm=TRUE)))/length(Within)

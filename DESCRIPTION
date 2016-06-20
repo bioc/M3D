@@ -1,7 +1,7 @@
 Package: M3D
 Type: Package
 Title: Identifies differentially methylated regions across testing groups
-Version: 1.7.2
+Version: 1.7.4
 Date: 2015-09-17
 Author: Tom Mayo
 Maintainer: Tom Mayo <t.mayo@ed.ac.uk>
@@ -18,13 +18,15 @@ Imports:
     GenomicRanges,
     SummarizedExperiment,
     BiSeq,
-    parallel
+    parallel,
+    Rcpp
+LinkingTo: Rcpp
 Depends:
-    R (>= 3.0.0)
+    R (>= 3.3.0)
 VignetteBuilder: knitr
 Suggests:
     BiocStyle,
     knitr,
-    RUnit,
-    BiocGenerics
+    testthat
 biocViews: DNAMethylation, DifferentialMethylation, Coverage, CpGIsland
+RoxygenNote: 5.0.1
