@@ -9,3 +9,12 @@ NULL
 #' @useDynLib M3D
 #' @importFrom Rcpp sourceCpp
 NULL
+
+#' @import S4Vectors
+NULL
+
+#' @import SummarizedExperiment
+NULL
+
+#' @import parallel
+NULL

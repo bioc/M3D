@@ -20,4 +20,4 @@ First package release. News and details of updates will be added to this file in
 
 1.7.4 Major speedups to main functions. ‘lite’ functions introduced, which are faster and save memory. See the vignette for details.
 
-1.7.5 Bug fix
+1.7.5 and 1.7.6 Fixes to pass Bioconductor checks
