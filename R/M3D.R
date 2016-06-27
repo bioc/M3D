@@ -13,6 +13,9 @@ NULL
 #' @import S4Vectors
 NULL
 
+#' @import BiocGenerics
+NULL
+
 #' @import SummarizedExperiment
 NULL
 

@@ -61,14 +61,14 @@ M3D_Para_lite <- function(rrbs, CpGs, overlaps, group1=NaN,group2=NaN, num.cores
         } else {
             inds <- (((i-1)*islsPerCore)+1):(i*islsPerCore)
         }
-
         ovs <- overlaps[queryHits(overlaps) %in% inds]
         rrbsList[[i]]<-rrbs[subjectHits(ovs)]
         len <- length(subjectHits(ovs))
         q.map <- as.integer(queryHits(ovs)-(queryHits(ovs)[1]-1))
         s.map <- as.integer(1:len)
-        ovs <- new('Hits',queryHits=q.map,subjectHits=s.map,
-                   queryLength=len,subjectLength=len)
+        # ovs <- new('Hits',queryHits=q.map,subjectHits=s.map,
+                   # queryLength=len,subjectLength=len)
+        ovs <- Hits(from = q.map, to = s.map, nLnode = max(q.map), nRnode = len)
         ovList[[i]] <- ovs
         indList[[i]] <- inds
     }

@@ -27,18 +27,19 @@ test_that('findComps works properly', {
 
 test_that('M3D_Single works properly', {
     library('BiSeq')
+    library('GenomicRanges')
     data('rrbsDemo')
     data('CpGsDemo')
     rrbs <- rrbsDemo
-    overlaps <- GenomicRanges::findOverlaps(CpGsDemo,rrbs)
+    overlaps <- findOverlaps(CpGsDemo,rrbs)
     numPairs <- 6
     nSamples <- 4
     a <- unlist(lapply(1:(nSamples-1), function(i) rep(i,(nSamples-i))))
     b <- unlist(lapply(1:(nSamples-1), function(i) (i+1):nSamples))
     samplesIdx <- cbind(a,b)
 
-    methIndices <- GenomicRanges::subjectHits(overlaps[
-        GenomicRanges::queryHits(overlaps)==1])
+    methIndices <- subjectHits(overlaps[
+        queryHits(overlaps)==1])
 
     sample1 <- "H1-hESC1"
     sample2 <- "H1-hESC2"

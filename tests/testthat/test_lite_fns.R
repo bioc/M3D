@@ -37,6 +37,7 @@ test_that('pvals_lite works properly', {
 test_that('M3D_Para_lite works properly', {
     library(parallel)
     library(BiSeq)
+    library('GenomicRanges')
     data(rrbsDemo)
     data(CpGsDemo)
     data(MMDlistDemo)
