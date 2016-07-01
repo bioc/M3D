@@ -25,6 +25,11 @@ Takes in a vector of strings of sample names and returns strings of
 all the comparisons, either within a testing group or between testing groups.
  This is not intended to be called directly by the user.
 }
+\examples{
+data(rrbsDemo)
+samples1 <- rownames(colData(rrbsDemo))[colData(rrbsDemo)[,]=='H1=hESC']
+within1 <- determineGroupComps(samples1,type='within')
+}
 \author{
 Tom Mayo \email{t.mayo@ed.ac.uk}
 }

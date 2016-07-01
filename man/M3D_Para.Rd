@@ -34,12 +34,15 @@ Returns the two components of the M3D test-statistic - the MMD
 only data, respectively - for all regions and all samples pairs, as a matrix.
 }
 \examples{
+library(BiSeq)
+library('GenomicRanges')
 data(rrbsDemo)
 data(CpGsDemo)
-CpGsDemo <- CpGsDemo[1:20]
-overlaps <- GenomicRanges::findOverlaps(CpGsDemo, rrbsDemo)
-M3D_list <- M3D_Para(rrbsDemo, CpGsDemo, overlaps)
-head(M3D_list$Full-M3D_list$Coverage)
+data(MMDlistDemo)
+CpGs1 <- CpGsDemo[1:100]
+overlaps1 <- findOverlaps(CpGs1,rrbsDemo)
+M3D_stat_lite <- M3D_Para(rrbsDemo,CpGs1,overlaps1,num.cores=4)
+head(M3D_stat_lite[[1]] - M3D_stat_lite[[2]])
 }
 \author{
 Tom Mayo \email{t.mayo@ed.ac.uk}

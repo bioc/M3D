@@ -13,6 +13,11 @@
 #' @return A vector of sample pair comparisons of the form 'sample1 vs sample2'
 #'  for use with the M3D functions
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
+#' @export
+#' @examples
+#' data(rrbsDemo)
+#' samples1 <- rownames(colData(rrbsDemo))[colData(rrbsDemo)[,]=='H1=hESC']
+#' within1 <- determineGroupComps(samples1,type='within')
 
 determineGroupComps <- function(samples1,samples2=NULL,type){
   len <- length(samples1)

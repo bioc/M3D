@@ -41,12 +41,16 @@ with the cross group sample pairs averaged to save memory (in column one),
 as a matrix.
 }
 \examples{
+library(parallel)
+library(BiSeq)
+library('GenomicRanges')
 data(rrbsDemo)
 data(CpGsDemo)
-CpGsDemo <- CpGsDemo[1:20]
-overlaps <- GenomicRanges::findOverlaps(CpGsDemo,rrbsDemo)
-M3D_list <- M3D_Para_lite(rrbsDemo,CpGsDemo, overlaps)
-head(M3D_list)
+data(MMDlistDemo)
+CpGs1 <- CpGsDemo[1:100]
+overlaps1 <- findOverlaps(CpGs1,rrbsDemo)
+M3D_stat_lite <- M3D_Para_lite(rrbsDemo,CpGs1,overlaps1,num.cores=4)
+head(M3D_stat_lite)
 }
 \author{
 Tom Mayo \email{t.mayo@ed.ac.uk}

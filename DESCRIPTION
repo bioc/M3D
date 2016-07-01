@@ -1,7 +1,7 @@
 Package: M3D
 Type: Package
 Title: Identifies differentially methylated regions across testing groups
-Version: 1.7.7
+Version: 1.7.9
 Date: 2016-06-22
 Author: Tom Mayo
 Maintainer: Tom Mayo <t.mayo@ed.ac.uk>
@@ -13,16 +13,16 @@ Description: This package identifies statistically significantly differentially
 License: Artistic License 2.0
 Imports:
     parallel,
-    Rcpp
-LinkingTo: Rcpp
-Depends:
-    R (>= 3.3.0),
+    Rcpp,
     BiocGenerics,
     S4Vectors,
     IRanges,
     GenomicRanges,
     SummarizedExperiment,
     BiSeq
+LinkingTo: Rcpp
+Depends:
+    R (>= 3.3.0)
 VignetteBuilder: knitr
 Suggests:
     BiocStyle,

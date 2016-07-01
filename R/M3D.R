@@ -8,16 +8,11 @@ NULL
 
 #' @useDynLib M3D
 #' @importFrom Rcpp sourceCpp
-NULL
-
-#' @import S4Vectors
-NULL
-
 #' @import BiocGenerics
-NULL
-
-#' @import SummarizedExperiment
-NULL
-
-#' @import parallel
+#' @import S4Vectors
+#' @import IRanges
+#' @import GenomicRanges
+#' @importFrom SummarizedExperiment colData rowRanges
+#' @import BiSeq
+#' @importFrom parallel mcmapply detectCores
 NULL

@@ -34,16 +34,15 @@
 #'  adjusted p-values. The unadjusted p-values are stored in 'Pmean'.
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
 #' @export
-#' @import BiSeq
-#' @import GenomicRanges
-#' @import IRanges
 #' @examples
 #' data(rrbsDemo)
 #' data(CpGsDemo)
 #' data(MMDlistDemo)
+#' library(GenomicRanges)
+#' library(BiSeq)
 #' M3Dstat <- MMDlistDemo$Full-MMDlistDemo$Coverage
-#' group1 <- unique(GenomicRanges::colData(rrbsDemo)$group)[1]
-#' group2 <-unique(GenomicRanges::colData(rrbsDemo)$group)[2]
+#' group1 <- unique(colData(rrbsDemo)$group)[1]
+#' group2 <-unique(colData(rrbsDemo)$group)[2]
 #' PDemo <- pvals(rrbsDemo, CpGsDemo, M3Dstat,
 #'            group1, group2, smaller=FALSE,comparison='allReps')
 #' head(PDemo)

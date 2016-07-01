@@ -28,12 +28,16 @@
 #'  A. J. (2006). A kernel method for the two-sample-problem. In Advances in
 #'   neural information processing systems (pp. 513-520).
 #' @examples
+#' library(parallel)
+#' library(BiSeq)
+#' library('GenomicRanges')
 #' data(rrbsDemo)
 #' data(CpGsDemo)
-#' CpGsDemo <- CpGsDemo[1:20]
-#' overlaps <- GenomicRanges::findOverlaps(CpGsDemo,rrbsDemo)
-#' M3D_list <- M3D_Para_lite(rrbsDemo,CpGsDemo, overlaps)
-#' head(M3D_list)
+#' data(MMDlistDemo)
+#' CpGs1 <- CpGsDemo[1:100]
+#' overlaps1 <- findOverlaps(CpGs1,rrbsDemo)
+#' M3D_stat_lite <- M3D_Para_lite(rrbsDemo,CpGs1,overlaps1,num.cores=4)
+#' head(M3D_stat_lite)
 #' @export
 
 

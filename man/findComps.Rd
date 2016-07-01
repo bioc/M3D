@@ -23,6 +23,14 @@ Returns the indices of the M3D test-statistic components that contain
 Returns the columns of the test-statistic matrix that refer to specific
  samples. This is not intended to be called directly by the user.
 }
+\examples{
+data(MMDlistDemo)
+data(rrbsDemo)
+group1 <- 'H1-hESC'
+samples1 <- rownames(colData(rrbsDemo))[colData(rrbsDemo)[,]==group1]
+within1 <- M3D::determineGroupComps(samples1,type='within')
+findComps(MMDlistDemo, within1)
+}
 \author{
 Tom Mayo \email{t.mayo@ed.ac.uk}
 }

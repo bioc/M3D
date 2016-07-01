@@ -36,17 +36,16 @@
 #'  adjusted p-values. The unadjusted p-values are stored in 'Pmean'.
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
 #' @export
-#' @import BiSeq
-#' @import GenomicRanges
-#' @import IRanges
 #' @examples
 #' data(rrbsDemo)
 #' data(CpGsDemo)
+#' library(GenomicRanges)
+#' library(BiSeq)
 #' CpGsDemo <- CpGsDemo[1:5]
 #' overlaps <- GenomicRanges::findOverlaps(CpGsDemo,rrbsDemo)
 #' M3D_list <- M3D_Wrapper_lite(rrbsDemo,overlaps)
-#' group1 <- unique(GenomicRanges::colData(rrbsDemo)$group)[1]
-#' group2 <-unique(GenomicRanges::colData(rrbsDemo)$group)[2]
+#' group1 <- unique(colData(rrbsDemo)$group)[1]
+#' group2 <-unique(colData(rrbsDemo)$group)[2]
 #' PDemo <- pvals_lite(rrbsDemo, CpGsDemo, M3D_list,
 #'             group1, group2, smaller=FALSE,comparison='allReps')
 #' head(PDemo)

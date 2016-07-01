@@ -12,6 +12,16 @@
 #' @return Returns the indices of the M3D test-statistic components that contain
 #'  the sample pair comparisons in 'samples'
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
+#' @export
+#' @examples 
+#' data(MMDlistDemo)
+#' data(rrbsDemo)
+#' group1 <- 'H1-hESC'
+#' samples1 <- rownames(colData(rrbsDemo))[colData(rrbsDemo)[,]==group1]
+#' within1 <- M3D::determineGroupComps(samples1,type='within')
+#' findComps(MMDlistDemo, within1)
+
+
 
 findComps <- function(MMD,samples){
   
