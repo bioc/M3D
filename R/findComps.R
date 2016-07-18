@@ -14,6 +14,7 @@
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
 #' @export
 #' @examples 
+#' library(BiSeq)
 #' data(MMDlistDemo)
 #' data(rrbsDemo)
 #' group1 <- 'H1-hESC'

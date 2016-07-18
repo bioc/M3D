@@ -26,6 +26,7 @@ all the comparisons, either within a testing group or between testing groups.
  This is not intended to be called directly by the user.
 }
 \examples{
+library(BiSeq)
 data(rrbsDemo)
 samples1 <- rownames(colData(rrbsDemo))[colData(rrbsDemo)[,]=='H1=hESC']
 within1 <- determineGroupComps(samples1,type='within')

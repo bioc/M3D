@@ -24,6 +24,7 @@ Returns the columns of the test-statistic matrix that refer to specific
  samples. This is not intended to be called directly by the user.
 }
 \examples{
+library(BiSeq)
 data(MMDlistDemo)
 data(rrbsDemo)
 group1 <- 'H1-hESC'

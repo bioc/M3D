@@ -15,6 +15,7 @@
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
 #' @export
 #' @examples
+#' library(BiSeq)
 #' data(rrbsDemo)
 #' samples1 <- rownames(colData(rrbsDemo))[colData(rrbsDemo)[,]=='H1=hESC']
 #' within1 <- determineGroupComps(samples1,type='within')
