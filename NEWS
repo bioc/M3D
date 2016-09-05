@@ -21,3 +21,5 @@ First package release. News and details of updates will be added to this file in
 1.7.4 Major speedups to main functions. ‘lite’ functions introduced, which are faster and save memory. See the vignette for details.
 
 1.7.5 - 1.7.10 Fixes to pass Bioconductor checks, no changes in workings of package
+
+1.7.11 Added readBedFiles function to read in the different styles of bed file. This replaces readENCODEdata. For the same results, use readBEDFiles with bed_type=‘Encode’ (the default). Details are in the vignette. Also added an error check so that if the files are read in an order that cannot be processed later, an error is called before any work is done.
