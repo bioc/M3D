@@ -5,7 +5,8 @@
 \title{Computes p-values}
 \usage{
 pvals(rrbs, CpGs, MMD, group1, group2, smaller = FALSE,
-  comparison = "allReps", method = "empirical", closePara = 0.005)
+  comparison = "allReps", method = "empirical", outlier_test = FALSE,
+  thresh = NA, cut_off = 0.975, sds = 8, closePara = 0.005)
 }
 \arguments{
 \item{rrbs}{An rrbs object containing methylation and coverage data as
@@ -39,13 +40,29 @@ Values are either 'allReps', 'Group1' or 'Group2'.}
  This is the default. 'model', fits an exponential distribution to the tail
  of our null distribution.}
 
+\item{outlier_test}{Logical, indicating whether to screen for outliers in 
+null distribution. Use only when comparison is to one group. Default is FALSE}
+
+\item{thresh}{The threshold for cutting off regions as highly variable. This
+is only to be used if results are being standardised across multiple 
+tests. Default is NA and is calculated using cut_off and sds parameters.}
+
+\item{cut_off}{In the outlier test, we require any outlier to be in this 
+quartile, as a minimum, set to 0.975 by default}
+
+\item{sds}{In the outlier test, we require any outlier in the null to be 
+greater than the mean of the null plus this many standard deviations, set to 
+8 by default}
+
 \item{closePara}{Sets a threshold for how close the exponential curve should
 fit the empirical distribution in the 'model' method. If the method produces
 errors, consider raising this parameter.}
 }
 \value{
 Returns a list P, with 2 entries. 'FDRmean' is the Benjamini-Hochberg
- adjusted p-values. The unadjusted p-values are stored in 'Pmean'.
+ adjusted p-values. The unadjusted p-values are stored in 'Pmean'. If 
+ outlier_test is TRUE, we also have the highly variable regions as a third 
+ entry
 }
 \description{
 Returns p-values for each region reflecting the probability of observing the

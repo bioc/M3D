@@ -278,6 +278,16 @@ for (i in 1:4){
 }
 @
 
+\subsection{Identifying highly variable regions: outlier detection}
+
+As of October 2016, M3D now supports identifying highly variable regions in the null distribution, and excluding them from the analysis. We have noticed in some experiments, some regions of the genome have very high variability, which is not representative of the usual, highly regulated patterns. We propose to identify these regions first, then perfrom the statistical test in the usual manner. If you are struggling to find DMRs using M3D, this may be a reason.
+
+To do so, we have an option 'outlier\textunderscore test' in the pvals functions. By default it is set to FALSE, so to activate the test set this to 'TRUE'. Our method is to identify any regions, among those presented to the function, which have a pair of regions in the null distribution that is greater than 8 times the standard deviation of the null, above the mean of the null. Additionally, we insist that this region must be in the top 2.5 percent of the variation within the null group. These values (8 and 2.5 percent) are set by the parameters 'cut\textunderscore off' and 'sds' respectively. If you are performing many tests across different groups, one can set the threshold directly using 'thresh'. This will overwrite the calculation of the threshold.
+
+In this setting, the p-values and FDR-valeus returned are as before, but with 'highly variable' regions returing NA. Additionally, there is a third entry in the returned list, 'HighVariation' which gives the indices of the identified highly variable regions.
+
+One can confirm any selections are sensible by plotting all samples in the region using the plotMethProfileSamples function (which gives the first group in blue and the second in red).
+
 \section{Using the 'lite' functions} \label{lite_section}
 
 When dealing with larger data sets such as those consisting of many replicates, or if we simply want faster processing times, we may want to reduce the amount of data stored by the M3D method. The lite functions provide such a feature.

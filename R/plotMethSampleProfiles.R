@@ -97,8 +97,7 @@ plotMethSampleProfiles <- function(rrbs, CpGs, group1, group2, CpGindex,
     
     
     if (cov_test_sum==TRUE){
-        message('At least one sample has no coverage: ', 
-                paste(sample_names[[which(cov_test==TRUE)]], sep=', '))
+        message('At least one sample has no coverage ')
         return()
     }
 

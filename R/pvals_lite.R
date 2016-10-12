@@ -29,11 +29,23 @@
 #' 'empirical' uses the empirical distribution directly, without modelling.
 #'  This is the default. 'model', fits an exponential distribution to the tail
 #'  of our null distribution.
+#' @param outlier_test Logical, indicating whether to screen for outliers in 
+#' null distribution. Use only when comparison is to one group. Default is FALSE
+#' @param thresh The threshold for cutting off regions as highly variable. This
+#' is only to be used if results are being standardised across multiple 
+#' tests. Default is NA and is calculated using cut_off and sds parameters.
+#' @param cut_off In the outlier test, we require any outlier to be in this 
+#' quartile, as a minimum, set to 0.975 by default
+#' @param sds In the outlier test, we require any outlier in the null to be 
+#' greater than the mean of the null plus this many standard deviations, set to 
+#' 8 by default
 #' @param closePara Sets a threshold for how close the exponential curve should
 #' fit the empirical distribution in the 'model' method. If the method produces
 #' errors, consider raising this parameter.
 #' @return Returns a list P, with 2 entries. 'FDRmean' is the Benjamini-Hochberg
-#'  adjusted p-values. The unadjusted p-values are stored in 'Pmean'.
+#'  adjusted p-values. The unadjusted p-values are stored in 'Pmean'. If 
+#'  we are test for outliers, we also have the highly variable regions as a third 
+#'  entry
 #' @author Tom Mayo \email{t.mayo@@ed.ac.uk}
 #' @export
 #' @examples
@@ -52,32 +64,34 @@
 
 
 pvals_lite <- function(rrbs, CpGs, M3D_stat_lite, group1, group2,
-                  smaller=FALSE,comparison='allReps',method='empirical',closePara=0.005){
+                            smaller=FALSE,comparison='allReps',method='empirical',
+                            outlier_test = FALSE, thresh = NA, cut_off = 0.975, 
+                            sds = 8, closePara=0.005){
     # get the names of the columns to compare from M3D_stat_lite object
     samples1 <- rownames(colData(rrbs))[colData(rrbs)[,]==group1]
     samples2 <- rownames(colData(rrbs))[colData(rrbs)[,]==group2]
     within1 <- determineGroupComps(samples1,type='within')
     within2 <- determineGroupComps(samples2,type='within')
-#     within <- c(within1,within2)
-#     between <- determineGroupComps(samples1,samples2,type='between')
-#
-#     ids1 <- findComps(M3D_stat_lite,within1)
-#     ids2 <- findComps(M3D_stat_lite,within2)
-#     ids3 <- findComps(MMD,between)
-#
-#     # get the MMD in order of between groups, then within groups
-#     Within <- cbind(MMD[,within1],MMD[,within2])
-#     colnames(Within) <- c(within1,within2)
-#     Between <- MMD[,between]
-#     AvsB <- cbind(Between,Within)
+    #     within <- c(within1,within2)
+    #     between <- determineGroupComps(samples1,samples2,type='between')
+    #
+    #     ids1 <- findComps(M3D_stat_lite,within1)
+    #     ids2 <- findComps(M3D_stat_lite,within2)
+    #     ids3 <- findComps(MMD,between)
+    #
+    #     # get the MMD in order of between groups, then within groups
+    #     Within <- cbind(MMD[,within1],MMD[,within2])
+    #     colnames(Within) <- c(within1,within2)
+    #     Between <- MMD[,between]
+    #     AvsB <- cbind(Between,Within)
     Within <- M3D_stat_lite[,2:length(M3D_stat_lite[1,])]
-
+    
     # find the total counts over each island, per sample
     nCpGs <- length(CpGs)
     ovlaps <- findOverlaps(CpGs,rowRanges(rrbs))
     islandList <- unique(queryHits(ovlaps))
     nIslands <- length(islandList)
-
+    
     if (method=='model' | method=='model-con'){
         # fit an exponential to the tail of the curve, using the 95th percentile
         wndSze <- 0.01
@@ -93,11 +107,11 @@ pvals_lite <- function(rrbs, CpGs, M3D_stat_lite, group1, group2,
         inds <- cdf!=1 # remove the log(0) terms
         cdf <- cdf[inds]
         base <- base[inds]
-
+        
         # lambda method - search over lambdas, choose the
         # closest without underestimating the probabilities
         # (assume lambda between 1 and 150)
-
+        
         lambdaTests <- seq(1,150,0.1)
         fit <- rep(NaN,length(lambdaTests))
         pass <- rep(TRUE,length(lambdaTests))
@@ -121,7 +135,7 @@ pvals_lite <- function(rrbs, CpGs, M3D_stat_lite, group1, group2,
         ind <- which(fit==min(fit,na.rm=TRUE))
         lambda <- lambdaTests[ind]
         cat('lambda = ',lambda)
-
+        
         # get the pvalues (under the exponential distribution with lambda)
         # use the mean of the inter-group M3D stats
         Pmean <- lapply(1:length(CpGs), function(i) {
@@ -133,31 +147,53 @@ pvals_lite <- function(rrbs, CpGs, M3D_stat_lite, group1, group2,
         })
     } else if (method=='empirical'){
         # use the empirical distribution of the test-statistic as null distribution
+        if(comparison == 'Group1'){
+            null <- M3D_stat_lite[,within1]
+        } else if (comparison == 'Group2'){
+            null <- M3D_stat_lite[,within2]
+        } else {
+            null <- Within
+        }
+        if(outlier_test){
+            if(is.na(thresh)){
+                tukey_cut_off <- quantile(null, cut_off, na.rm = TRUE)
+                thresh <- mean(null, na.rm = TRUE) + sds * sd(null, na.rm = TRUE)
+                thresh <- max(tukey_cut_off, thresh, na.rm=TRUE)
+            }
+            if(is.vector(null)){
+                high_within <- unique(which(null > thresh, 
+                                            arr.ind = TRUE))
+            } else { 
+                high_within <- unique(which(null > thresh, 
+                                            arr.ind = TRUE)[,1]) # cut out any with some islands that different
+            }
+            inds <- setdiff(1:nIslands, high_within)
+            if(is.vector(null)){
+                null <- null[inds]
+            } else { 
+                null <- null[inds,]
+            }
+        }
+        
         Pmean <- lapply(1:nIslands, function(j) {
             if (smaller==TRUE){
-                if (comparison=='Group1'){
-                    length(which(M3D_stat_lite[,within1] <=M3D_stat_lite[j,1]))/
-                        length(within1)/nIslands
-                } else if (comparison=='Group2')  {
-                    length(which(M3D_stat_lite[,within2]<=M3D_stat_lite[j,1]))/
-                        length(within2)/nIslands
-                } else {
-                    length(which(Within <= M3D_stat_lite[j,1]))/length(Within)
-                }
-
+                length(which(null <= M3D_stat_lite[j,1]))/
+                    length(null)
             } else {
-
-                if (comparison=='Group1'){
-                    length(which(M3D_stat_lite[,within1]>=M3D_stat_lite[j,1]))/
-                        length(within1)/nIslands
-                } else if (comparison=='Group2')  {
-                    length(which(M3D_stat_lite[,within2]>=M3D_stat_lite[j,1]))/
-                        length(within2)/nIslands
-                } else {
-                    length(which(Within >= M3D_stat_lite[j,1]))/length(Within)
-                }
+                length(which(null >= M3D_stat_lite[j,1]))/
+                    length(null)
             }
         })
+        
+        if(outlier_test){
+            Pmean <- unlist(Pmean)
+            Pmean[high_within] <- NA
+            FDRmean <- p.adjust(as.vector(Pmean),method='BH')
+            FDRmean[high_within] <- NA
+            P <- list(Pmean,FDRmean, high_within)
+            names(P) <- c('Pmean','FDRmean', 'HighVariation')
+            return(P)
+        }
     }
     Pmean <- unlist(Pmean)
     FDRmean <- p.adjust(as.vector(Pmean),method='BH')
