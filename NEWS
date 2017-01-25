@@ -27,3 +27,5 @@ First package release. News and details of updates will be added to this file in
 1.7.12 Added outlier detection to the pvals and pvals_lite functions. This tests for highly variable regions in the null distribution and excludes them from further analysis. Please see the vignette.
 
 1.9.1 Bug fix for readBedFiles. Thanks to Francesca Cairoli of the University of Trieste for the feedback.
+
+1.9.2 Removed parallel function due to incompatibility with Windows. I am investigation a cross platform solution in the meantime. Due to speed ups, the sequential ‘lite’ function should be fast enough for all practical needs.
