@@ -28,4 +28,4 @@ First package release. News and details of updates will be added to this file in
 
 1.9.1 Bug fix for readBedFiles. Thanks to Francesca Cairoli of the University of Trieste for the feedback.
 
-1.9.2 Removed parallel function due to incompatibility with Windows. I am investigation a cross platform solution in the meantime. Due to speed ups, the sequential ‘lite’ function should be fast enough for all practical needs.
+1.9.2-3 Removed parallel function due to incompatibility with Windows. I am investigation a cross platform solution in the meantime. Due to speed ups, the sequential ‘lite’ function should be fast enough for all practical needs.
