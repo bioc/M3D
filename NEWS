@@ -25,3 +25,6 @@ First package release. News and details of updates will be added to this file in
 1.7.11 Added readBedFiles function to read in the different styles of bed file. This replaces readENCODEdata. For the same results, use readBEDFiles with bed_type=‘Encode’ (the default). Details are in the vignette. Also added an error check so that if the files are read in an order that cannot be processed later, an error is called before any work is done.
 
 1.7.12 Added outlier detection to the pvals and pvals_lite functions. This tests for highly variable regions in the null distribution and excludes them from further analysis. Please see the vignette.
+
+
+1.8.2 Bug fix for readBedFiles. Thanks to Francesca Cairoli of the University of Trieste for the feedback. Removed parallel function due to incompatibility with Windows. I am investigation a cross platform solution in the meantime. Due to speed ups, the sequential ‘lite’ function should be fast enough for all practical needs.

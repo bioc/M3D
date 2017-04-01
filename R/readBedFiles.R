@@ -39,7 +39,7 @@ readBedFiles <- function(files, colData, bed_type = 'Encode', eData=NaN) {
     }
 
     message('Reading in files\n')
-    methData <- readBedRaw(files, colData, bed_type='Encode')
+    methData <- readBedRaw(files, colData, bed_type=bed_type)
 
     cat("Building BSraw object.\n")
 
